@@ -16,5 +16,5 @@ This project is a login , register interface along with admin interactivity.
 
 - Team Member 1: [Denesh Barua Pantho](https://github.com/Melovalent-DBP)
 - Team Member 2: [Shadman Saleh](https://github.com/shadmansaleh)
-- Team Member 3: [GitHub Username](https://github.com/EsnatJahan)
+- Team Member 3: [Esnat Jahan Ena](https://github.com/EsnatJahan)
 
