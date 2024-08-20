@@ -16,7 +16,7 @@ function sleep_with_dots() {
 
   for ((i=0; i<count; i++)); do 
     echo -n "."
-    sleep $interval #in the loop , dots are shown , then interval occurs.
+    sleep $interval #. + interval , then . + interval
   done
   echo  # Move to a new line after the last dot
 }
@@ -115,6 +115,7 @@ function remove_user() {
   done
   users=("${new_users[@]}")                           # users = new_users
   save_users
+  echo 
 }
 
 #User list show
@@ -148,8 +149,7 @@ function add_file_with_owner() {
   read file_name     #Name of New FIle name
   sleep_with_dots 3 0.5
   touch "$file_name"
-  echo "$file_name added successfully."
-  sleep_with_dots 3 0.5
+
 
   local ownership_file="file_ownership.txt" 
   #A list of created_file with OWner
@@ -173,7 +173,9 @@ function add_file_with_owner() {
 
   # If the file was not found in the list, add it as a new owner
   echo "$file_name:$current_user" >> "$temp_file"
-
+  echo "$file_name added successfully."
+  sleep_with_dots 3 0.5
+  
   # Replace the original ownership file with the updated temp file
   mv "$temp_file" "$ownership_file"
 }
@@ -196,7 +198,7 @@ function remove_file_if_owner() {
       # Also remove the entry from the tracking file "temp.txt"
       
       # -v "^$file_name:" part filters out all lines 
-      # file_name-এর সাথে মিলে যাওয়া লাইন বাদ দিয়ে বাকি সব লাইন পেতে চাই।
+      # file_name-এর সাথে মিলে যাওয়া লাইন বাদ দিয়ে বাকি সব লাইন থাকবে।
 
       grep -v "^$file_name:" file_ownership.txt > temp.txt && mv temp.txt file_ownership.txt
     else
@@ -350,13 +352,15 @@ function signup() {
 
 # helper function to display a menu
 function choice() {      # choice("intro message", "option1", "option2", ...)
-  local intro="$1"
-  local opts=("$@")
+  local intro="$1"   #intro message  
+  local opts=("$@")  
   local res=""
 
   # Print the intro message with animation
-  IFS=' ' read -r -a words <<< "$intro"
-  for word in "${words[@]}"; do
+  IFS=' ' read -r -a words <<< "$intro" #Seperates each word from Intro Message
+                                        # -r -> reads special symbol as text
+                                        # -a -> convert the 
+  for word in "${words[@]}"; do       
       echo -n "$word "
       sleep 0.5 # Adjust sleep as needed for desired speed
   done
