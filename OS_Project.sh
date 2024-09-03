@@ -377,7 +377,7 @@ function user_menu() {
   choice "Welcome To The User Menu" "${options[@]}"
   case "$?" in
     0)
-      clear
+      clear         # clear the screen , means clear the previous outputs that are shown previously.
       list_users
       ;;
     
@@ -418,7 +418,7 @@ function admin_menu() {
   choice "Welcome to Admin Portal" "${options[@]}"
   case "$?" in
     0)
-      clear
+      clear                # clear the screen , means clear the previous outputs that are shown previously.
       echo "Add User"
       read -p "Enter username: " username
       read -p "Enter password: " password
@@ -429,7 +429,7 @@ function admin_menu() {
       save_users
       ;;
     1)
-      clear
+      clear                  
       echo "Remove User"
       list_users
       read -p "Enter username: " username
@@ -483,7 +483,7 @@ function nologin_menu() {
   choice "$welcome_message" "${options[@]}"
   case "$?" in        # switch(choice return value)
     0)
-      clear             # clear the screen
+      clear             # clear the screen , means clear the previous outputs that are shown previously.
       login             # call login function
       ;;
     1)

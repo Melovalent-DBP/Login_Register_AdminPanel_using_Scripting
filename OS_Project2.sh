@@ -5,10 +5,14 @@ USER_FILE="users.csv"           # file to store users
 
 # global variables
 users=()                        
-# array of users , load every data from csv to array for fast lookup and access
+# array of users , 
+#load every data from csv to array for fast lookup and access
+
 
 current_user=""                 # current logged in user
 current_role=""                 # current role of the user
+
+#To add animation after each instruction , two parameter: count , interval
 
 function sleep_with_dots() {
   local count=$1  # Number of dots to print
@@ -46,6 +50,7 @@ function load_users() {     # load user data from user.csv and fill users array
   } < "$USER_FILE"          # read from users.csv instead of stdin
 }
 
+
 # Write current users array info to users.csv (write = save)
 function save_users() {
   {
@@ -56,7 +61,7 @@ function save_users() {
   } > "$USER_FILE"
 }
 
-
+#Sturcture on how the input works
 # Helps to extract values from users.csv to string format to manipulate
 # The main use is to get values line by line from users.csv
 # It is the structure , as like input string structure
@@ -64,10 +69,10 @@ function save_users() {
 function csv_get() {   # csv_get("username,password,email,phone,role", 0) => "username"
   local csv="$1"  #here csv = "username,password,email,phone,role" , basically as a 2D array, it is the row index
   local idx="$2"  #here idx = 1 , basically as 2D array, it is the column index
-  
   #[username , password , email ,....][idx=1 means 1st user]
   #[username , password , email ,....][idx=2 means 2nd user]
   
+
   local IFS=, 
   # IFS[Internal Field Seperator] = "," {username , password , ....}
   
@@ -80,11 +85,13 @@ function csv_get() {   # csv_get("username,password,email,phone,role", 0) => "us
  
  }
 
+
+#Use of csv_get based on input,
 function csv_set() {  
 #csv_set("username,password,email,phone,role", 0, "new_username") => "new_username,password,email,phone,role"
   local csv="$1" # username,password,email,phone,role
   local idx="$2" # idx
-  local value="$3" # "new_username"
+  local value="$3" # "new_username"[modify user]
   local IFS=,
   local -a array=($csv)   # array = csv.split(",")
   array[$idx]="$value" 
@@ -98,6 +105,7 @@ function csv_set() {
   done
   echo "$res," 
 }
+
 
 # user related functions
 
@@ -136,7 +144,7 @@ function list_users() {
     local phone=$(csv_get "$user" 3)
     local role=$(csv_get "$user" 4) 
     if [ $current_role != "admin" ];then 
-      printf "%03d\t %15s\n" $idx $username
+      printf "%03d\t %15s\n" $idx $username #In the list , the sequence[id] and username are shown
     else
       printf  "%03d\t %15s\t %20s\t %12s\t %6s\n" $idx $username $email $phone $role
     fi
@@ -153,14 +161,19 @@ function add_file_with_owner() {
 
   local ownership_file="file_ownership.txt" 
   #A list of created_file with OWner
-  #Two Part", Owner name : File Name
+  #Two Part", File_Name: Owner_Name
 
-  local temp_file="temp_$ownership_file"   #It contain Updated_Owner with FileName
-  local found=0 #a variable to check the file in txt/not
-
-  # Check the created file exists in the txt /not 
+  local temp_file="temp_$ownership_file" 
+  #The main purpose is to change in temp_file , then update the original  
+  #It contains Owner + Updated_FileName
+  
+  local found=0 
+  #Check redaundency
+  #a variable to check the file[Previously Created or Not] in file_ownership.txt 
   # , otherwise add a new entry
-  while IFS=: read -r existing_file owner; do   # while(file_name , owner_name) in ownership_file
+
+
+  while IFS=: read -r existing_file owner; do   # while(file_name , owner_name) in file_ownership.txt
    
     if [ "$existing_file" == "$file_name" ]; then  
     # this logic is to check if the file is already present in the file_ownership.txt file 
@@ -171,7 +184,8 @@ function add_file_with_owner() {
     echo "$existing_file:$owner" >> "$temp_file"
   done < "$ownership_file"
 
-  # If the file was not found in the list, add it as a new owner
+  # Main Purpose is done here [To add new file,no redaundency]
+  # If the file is not added Previously, add it as a new owner
   echo "$file_name:$current_user" >> "$temp_file"
   echo "$file_name added successfully."
   sleep_with_dots 3 0.5
@@ -185,22 +199,22 @@ function remove_file_if_owner() {
   echo "Enter the name of the file to remove:"
   read file_name  
   sleep_with_dots 3 0.5
-  if [ -f "$file_name" ]; then
+  if [ -f "$file_name" ]; then  # -f , file or not
     local owner=$(grep "^$file_name:" file_ownership.txt | cut -d':' -f2) 
     #grep - finds out the file_name from file_ownership.txt
-    #cut means cut the file_ownership.txt file with delimiter ":" and print the second field
+    #cut -> cut the file_ownership.txt file with delimiter ":" and print the second field
     #cut actually finds out the owner
     
     if [ "$owner" == "$current_user" ]; then
       rm "$file_name"
       echo "$file_name removed successfully."
       
-      # Also remove the entry from the tracking file "temp.txt"
-      
-      # -v "^$file_name:" part filters out all lines 
-      # file_name-এর সাথে মিলে যাওয়া লাইন বাদ দিয়ে বাকি সব লাইন থাকবে।
 
       grep -v "^$file_name:" file_ownership.txt > temp.txt && mv temp.txt file_ownership.txt
+      # Also remove the entry from the tracking file "temp.txt"
+      # -v "^$file_name:" part filters out all lines 
+      # file_name-এর সাথে মিলে যাওয়া লাইন বাদ দিয়ে বাকি সব লাইন থাকবে। It ensures all the other files remain intact
+    
     else
       echo "Only the owner ($owner) can remove this file."
       sleep_with_dots 3 0.5
@@ -220,8 +234,11 @@ function remove_file_admin() {
     rm "$file_name"
     echo "$file_name removed successfully."
     sleep_with_dots 3 0.5
-    # Also remove the entry from the tracking file
+    
     grep -v "^$file_name:" file_ownership.txt > temp.txt && mv temp.txt file_ownership.txt #here grep -v is used to remove the line that matches the pattern "^$file_name:" from the file_ownership.txt file and then the output is redirected to temp.txt file and then the temp.txt file is renamed to file_ownership.txt
+    # Also remove the entry from the tracking file
+
+
   else 
     echo "File does not exist."
     sleep_with_dots 3 0.5
@@ -310,6 +327,7 @@ function modify_user() {
 }
 
 # user authentication functions
+# current_user -> sessioned user
 function login() {
   read -p "Enter username: " username               # cin >> username
   read -p "Enter password: " password      # cin >> password
